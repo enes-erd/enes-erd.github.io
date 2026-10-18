@@ -186,39 +186,6 @@
     .music.playing { animation: spin 4s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Opening envelope — the tap that lets the music start with sound */
-    .intro {
-      position: fixed;
-      inset: 0;
-      z-index: 10;
-      display: grid;
-      place-items: center;
-      padding: 24px 16px;
-      background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
-      cursor: pointer;
-      transition: opacity 0.8s ease, visibility 0.8s;
-      text-align: center;
-    }
-    .intro.hidden { opacity: 0; visibility: hidden; }
-    .envelope {
-      font-size: 5rem;
-      display: inline-block;
-      animation: wiggle 2.2s ease-in-out infinite;
-    }
-    @keyframes wiggle {
-      0%, 100% { transform: rotate(0deg) scale(1); }
-      10%      { transform: rotate(-8deg) scale(1.05); }
-      20%      { transform: rotate(8deg) scale(1.05); }
-      30%      { transform: rotate(0deg) scale(1); }
-    }
-    .intro h2 {
-      font-family: "Pacifico", cursive;
-      font-weight: 400;
-      font-size: clamp(1.6rem, 7vw, 2.4rem);
-      color: var(--rose-deep);
-      margin: 12px 0 20px;
-    }
-
     /* Music-reactive: --pulse jumps to 1 on each beat and decays, --level follows the bass */
     :root { --pulse: 0; --level: 0; }
     body.music-on .beat { animation: none; transform: scale(calc(1 + var(--pulse) * 0.6)); }
@@ -254,7 +221,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .hearts, .beat, .envelope, .music.playing { animation: none; }
+      .hearts, .beat, .music.playing { animation: none; }
       .hearts { display: none; }
     }
   </style>
@@ -265,14 +232,6 @@
   <canvas id="confetti" aria-hidden="true"></canvas>
   <audio id="song" src="zar-zor.mp3" loop preload="auto"></audio>
   <button type="button" class="music" id="music" aria-label="Müziği çal">🔇</button>
-
-  <div class="intro" id="intro" role="button" tabindex="0" aria-label="Sürprizi aç">
-    <div>
-      <span class="envelope">💌</span>
-      <h2>Sana küçük bir sürprizim var</h2>
-      <span class="pill">Açmak için dokun 💗</span>
-    </div>
-  </div>
 
   <main>
     <h1 class="names"><span id="names"></span></h1>
@@ -420,11 +379,9 @@
 
     $("again").addEventListener("click", celebrate);
 
-    // Background music, on by default. Browsers only allow sound after a tap,
-    // so the envelope screen provides that tap; it is skipped if autoplay is allowed.
+    // Background music, on by default
     const song = $("song");
     const musicBtn = $("music");
-    const intro = $("intro");
     song.volume = 0.6;
 
     function syncMusicBtn() {
@@ -505,19 +462,16 @@
       }
     }
 
-    addEventListener("pointerdown", setupAnalyser, { once: true });
-
-    function openIntro() {
+    // Try to autoplay; if the browser blocks it, start on the first tap or key press anywhere
+    function startOnInteraction(e) {
+      unlockEvents.forEach((ev) => removeEventListener(ev, startOnInteraction));
       setupAnalyser();
-      song.play().catch(() => {});
-      intro.classList.add("hidden");
+      if (e.target !== musicBtn) song.play().catch(() => {});
     }
-    intro.addEventListener("click", openIntro);
-    intro.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openIntro(); }
-    });
+    const unlockEvents = ["pointerdown", "keydown", "touchstart"];
+    unlockEvents.forEach((ev) => addEventListener(ev, startOnInteraction));
 
-    song.play().then(() => intro.classList.add("hidden")).catch(() => {});
+    song.play().catch(() => {});
 
     musicBtn.addEventListener("click", () => {
       setupAnalyser();
