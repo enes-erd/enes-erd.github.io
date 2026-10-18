@@ -394,7 +394,7 @@
     song.addEventListener("pause", syncMusicBtn);
 
     // Beat-reactive visuals. The AudioContext has to be created from a tap,
-    // so this runs from the envelope / music button / first touch.
+    // so this runs from the first tap or the music button.
     let audioCtx, analyser, freq;
     let bassAvg = 0, pulse = 0, level = 0, lastBeat = 0;
     const root = document.documentElement;
