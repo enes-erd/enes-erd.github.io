@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Until We Meet</title>
-  <meta name="description" content="Counting down the days until we're together again.">
+  <title>Kavuşmamıza Kalan</title>
+  <meta name="description" content="Yeniden kavuşmamıza kalan günleri sayıyoruz.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💗</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,6 @@
       --ink-soft: #a26b7d;
       --rose: #ff7aa2;
       --rose-deep: #e8507f;
-      --peach: #ffc2a8;
       --track: #ffd9e4;
     }
 
@@ -120,7 +119,6 @@
     .label {
       font-size: 0.85rem;
       color: var(--ink-soft);
-      text-transform: lowercase;
       letter-spacing: 0.04em;
     }
 
@@ -128,54 +126,6 @@
       margin-top: 18px;
       font-size: 0.95rem;
       color: var(--ink-soft);
-    }
-
-    /* Progress bar */
-    .progress {
-      margin-top: 32px;
-      text-align: left;
-    }
-    .progress-head {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.9rem;
-      color: var(--ink-soft);
-      margin-bottom: 10px;
-    }
-    .track {
-      position: relative;
-      height: 16px;
-      background: var(--track);
-      border-radius: 999px;
-    }
-    .fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--peach), var(--rose));
-      transition: width 1s ease;
-    }
-    .runner {
-      position: absolute;
-      top: 50%;
-      left: 0%;
-      transform: translate(-50%, -55%);
-      font-size: 1.6rem;
-      transition: left 1s ease;
-      filter: drop-shadow(0 2px 2px rgba(232, 80, 127, 0.3));
-    }
-    .goal {
-      position: absolute;
-      top: 50%;
-      right: -6px;
-      transform: translateY(-55%);
-      font-size: 1.4rem;
-    }
-    .progress-foot {
-      margin-top: 10px;
-      font-size: 0.85rem;
-      color: var(--ink-soft);
-      text-align: center;
     }
 
     .note {
@@ -196,8 +146,8 @@
       margin: 24px 0 8px;
     }
     .together p { font-size: 1.15rem; }
-    .together button {
-      margin-top: 20px;
+
+    .pill {
       font: inherit;
       color: #fff;
       background: var(--rose);
@@ -207,7 +157,8 @@
       cursor: pointer;
       box-shadow: 0 4px 0 var(--rose-deep);
     }
-    .together button:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--rose-deep); }
+    .pill:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--rose-deep); }
+    .together .pill { margin-top: 20px; }
 
     #confetti {
       position: fixed;
@@ -235,13 +186,46 @@
     .music.playing { animation: spin 4s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Opening envelope — the tap that lets the music start with sound */
+    .intro {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+      background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      cursor: pointer;
+      transition: opacity 0.8s ease, visibility 0.8s;
+      text-align: center;
+    }
+    .intro.hidden { opacity: 0; visibility: hidden; }
+    .envelope {
+      font-size: 5rem;
+      display: inline-block;
+      animation: wiggle 2.2s ease-in-out infinite;
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      10%      { transform: rotate(-8deg) scale(1.05); }
+      20%      { transform: rotate(8deg) scale(1.05); }
+      30%      { transform: rotate(0deg) scale(1); }
+    }
+    .intro h2 {
+      font-family: "Pacifico", cursive;
+      font-weight: 400;
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+      color: var(--rose-deep);
+      margin: 12px 0 20px;
+    }
+
     @media (max-width: 380px) {
       main { padding: 32px 16px 24px; }
       .countdown { gap: 8px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .hearts, .beat { animation: none; }
+      .hearts, .beat, .envelope, .music.playing { animation: none; }
       .hearts { display: none; }
     }
   </style>
@@ -250,74 +234,67 @@
   <div class="hearts" aria-hidden="true"></div>
   <canvas id="confetti" aria-hidden="true"></canvas>
   <audio id="song" src="zar-zor.mp3" loop preload="auto"></audio>
-  <button type="button" class="music" id="music" aria-label="Play music">🔇</button>
+  <button type="button" class="music" id="music" aria-label="Müziği çal">🔇</button>
+
+  <div class="intro" id="intro" role="button" tabindex="0" aria-label="Sürprizi aç">
+    <div>
+      <span class="envelope">💌</span>
+      <h2>Sana küçük bir sürprizim var</h2>
+      <span class="pill">Açmak için dokun 💗</span>
+    </div>
+  </div>
 
   <main>
     <h1 class="names"><span id="names"></span></h1>
 
     <section class="counting">
-      <p class="subtitle">until we're together again <span class="beat">💗</span></p>
+      <p class="subtitle">yeniden kavuşmamıza kalan <span class="beat">💗</span></p>
 
       <div class="countdown" role="timer" aria-live="off">
-        <div class="unit"><div class="num" id="d">0</div><div class="label">days</div></div>
-        <div class="unit"><div class="num" id="h">00</div><div class="label">hours</div></div>
-        <div class="unit"><div class="num" id="m">00</div><div class="label">minutes</div></div>
-        <div class="unit"><div class="num" id="s">00</div><div class="label">seconds</div></div>
+        <div class="unit"><div class="num" id="d">0</div><div class="label">gün</div></div>
+        <div class="unit"><div class="num" id="h">00</div><div class="label">saat</div></div>
+        <div class="unit"><div class="num" id="m">00</div><div class="label">dakika</div></div>
+        <div class="unit"><div class="num" id="s">00</div><div class="label">saniye</div></div>
       </div>
 
       <p class="date-line" id="date-line"></p>
-
-      <div class="progress">
-        <div class="progress-head">
-          <span>goodbye 👋</span>
-          <span>hello 🤗</span>
-        </div>
-        <div class="track">
-          <div class="fill" id="fill"></div>
-          <span class="runner" id="runner">✈️</span>
-          <span class="goal">🏡</span>
-        </div>
-        <p class="progress-foot" id="progress-foot"></p>
-      </div>
 
       <p class="note" id="note"></p>
     </section>
 
     <section class="together">
-      <h2>Together at last!</h2>
-      <p>No more counting. Go hug each other 💞</p>
-      <button type="button" id="again">more confetti 🎉</button>
+      <h2>Sonunda birlikteyiz!</h2>
+      <p>Artık saymak yok. Hadi sarıl bana 💞</p>
+      <button type="button" class="pill" id="again">biraz daha konfeti 🎉</button>
     </section>
   </main>
 
   <script>
     // ── Edit these ──────────────────────────────────────────────
-    // Dates use ISO format with a UTC offset, e.g. +01:00 for Stockholm in winter.
+    // Dates use ISO format with a UTC offset; Istanbul is always +03:00.
     const CONFIG = {
-      names:   "Enes & Bilge",
-      meet:    "2026-11-07T16:45:00+03:00", // 7 Nov, 16:45 Istanbul time
-      goodbye: "2026-09-01T10:00:00+02:00", // the day you said goodbye (for the progress bar)
-      note:    "Every second that ticks away is one second closer to you.",
+      names: "Enes & Bilge",
+      meet:  "2026-11-07T16:45:00+03:00", // 7 Kasım, 16:45 İstanbul saati
+      note:  "Geçen her saniye, seni bana biraz daha yaklaştırıyor.",
     };
     // ────────────────────────────────────────────────────────────
 
     const meet = new Date(CONFIG.meet);
-    const goodbye = new Date(CONFIG.goodbye);
     const $ = (id) => document.getElementById(id);
     const pad = (n) => String(n).padStart(2, "0");
 
     $("names").textContent = CONFIG.names;
     $("note").textContent = CONFIG.note;
-    $("date-line").textContent = meet.toLocaleString(undefined, {
+    $("date-line").textContent = meet.toLocaleString("tr-TR", {
+      timeZone: "Europe/Istanbul",
       weekday: "long", day: "numeric", month: "long", year: "numeric",
       hour: "2-digit", minute: "2-digit",
-    });
+    }) + " (İstanbul saati)";
 
     let celebrated = false;
 
     function tick() {
-      const now = Date.now();
-      const left = meet - now;
+      const left = meet - Date.now();
 
       if (left <= 0) {
         document.body.classList.add("reunited");
@@ -330,12 +307,6 @@
       $("h").textContent = pad(Math.floor(sec / 3600) % 24);
       $("m").textContent = pad(Math.floor(sec / 60) % 60);
       $("s").textContent = pad(sec % 60);
-
-      const total = meet - goodbye;
-      const pct = total > 0 ? Math.min(100, Math.max(0, ((now - goodbye) / total) * 100)) : 0;
-      $("fill").style.width = pct + "%";
-      $("runner").style.left = pct + "%";
-      $("progress-foot").textContent = `${pct.toFixed(1)}% of the way there`;
     }
 
     tick();
@@ -419,31 +390,32 @@
 
     $("again").addEventListener("click", celebrate);
 
-    // Background music: browsers block autoplay with sound, so fall back to the first interaction
+    // Background music, on by default. Browsers only allow sound after a tap,
+    // so the envelope screen provides that tap; it is skipped if autoplay is allowed.
     const song = $("song");
     const musicBtn = $("music");
+    const intro = $("intro");
     song.volume = 0.6;
 
     function syncMusicBtn() {
       const on = !song.paused;
       musicBtn.textContent = on ? "🎵" : "🔇";
       musicBtn.classList.toggle("playing", on);
-      musicBtn.setAttribute("aria-label", on ? "Pause music" : "Play music");
+      musicBtn.setAttribute("aria-label", on ? "Müziği durdur" : "Müziği çal");
     }
     song.addEventListener("play", syncMusicBtn);
     song.addEventListener("pause", syncMusicBtn);
 
-    function startOnInteraction(e) {
-      if (e.target === musicBtn) return;
+    function openIntro() {
       song.play().catch(() => {});
+      intro.classList.add("hidden");
     }
-    const unlockEvents = ["pointerdown", "keydown", "touchstart"];
-    unlockEvents.forEach((ev) => addEventListener(ev, startOnInteraction, { once: true }));
-    song.addEventListener("play", () => {
-      unlockEvents.forEach((ev) => removeEventListener(ev, startOnInteraction));
-    }, { once: true });
+    intro.addEventListener("click", openIntro);
+    intro.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openIntro(); }
+    });
 
-    song.play().catch(() => {});
+    song.play().then(() => intro.classList.add("hidden")).catch(() => {});
 
     musicBtn.addEventListener("click", () => {
       if (song.paused) song.play().catch(() => {});
