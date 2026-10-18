@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Until We Meet</title>
+  <meta name="description" content="Counting down the days until we're together again.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💗</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Pacifico&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #ffe4ec;
+      --bg-2: #fff6ea;
+      --card: rgba(255, 255, 255, 0.72);
+      --ink: #6b3a4b;
+      --ink-soft: #a26b7d;
+      --rose: #ff7aa2;
+      --rose-deep: #e8507f;
+      --peach: #ffc2a8;
+      --track: #ffd9e4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: "Fredoka", system-ui, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      background-attachment: fixed;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    /* Floating hearts in the background */
+    .hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .hearts span {
+      position: absolute;
+      bottom: -40px;
+      animation: float linear infinite;
+      opacity: 0;
+      user-select: none;
+    }
+    @keyframes float {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.7; }
+      90%  { opacity: 0.5; }
+      100% { transform: translateY(-110vh) rotate(25deg); opacity: 0; }
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 560px;
+      text-align: center;
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 32px;
+      padding: 40px 28px 32px;
+      box-shadow: 0 20px 60px rgba(232, 80, 127, 0.18);
+      border: 2px solid rgba(255, 255, 255, 0.9);
+    }
+
+    .names {
+      font-family: "Pacifico", cursive;
+      font-size: clamp(2rem, 8vw, 2.8rem);
+      color: var(--rose-deep);
+      line-height: 1.3;
+    }
+
+    .beat {
+      display: inline-block;
+      animation: beat 1.4s ease-in-out infinite;
+    }
+    @keyframes beat {
+      0%, 100% { transform: scale(1); }
+      15%      { transform: scale(1.25); }
+      30%      { transform: scale(1); }
+      45%      { transform: scale(1.15); }
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      font-size: 1.1rem;
+      color: var(--ink-soft);
+    }
+
+    .countdown {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 32px 0 8px;
+    }
+    .unit {
+      background: #fff;
+      border-radius: 20px;
+      padding: 16px 4px 12px;
+      box-shadow: 0 6px 0 var(--track);
+    }
+    .num {
+      font-size: clamp(1.8rem, 9vw, 2.8rem);
+      font-weight: 600;
+      color: var(--rose-deep);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+    .label {
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      text-transform: lowercase;
+      letter-spacing: 0.04em;
+    }
+
+    .date-line {
+      margin-top: 18px;
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+    }
+
+    /* Progress bar */
+    .progress {
+      margin-top: 32px;
+      text-align: left;
+    }
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      margin-bottom: 10px;
+    }
+    .track {
+      position: relative;
+      height: 16px;
+      background: var(--track);
+      border-radius: 999px;
+    }
+    .fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--peach), var(--rose));
+      transition: width 1s ease;
+    }
+    .runner {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -55%);
+      font-size: 1.6rem;
+      transition: left 1s ease;
+      filter: drop-shadow(0 2px 2px rgba(232, 80, 127, 0.3));
+    }
+    .goal {
+      position: absolute;
+      top: 50%;
+      right: -6px;
+      transform: translateY(-55%);
+      font-size: 1.4rem;
+    }
+    .progress-foot {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      text-align: center;
+    }
+
+    .note {
+      margin-top: 28px;
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+
+    /* Reunion state */
+    .together { display: none; }
+    body.reunited .counting { display: none; }
+    body.reunited .together { display: block; }
+    .together h2 {
+      font-family: "Pacifico", cursive;
+      font-weight: 400;
+      font-size: clamp(2rem, 9vw, 3rem);
+      color: var(--rose-deep);
+      margin: 24px 0 8px;
+    }
+    .together p { font-size: 1.15rem; }
+    .together button {
+      margin-top: 20px;
+      font: inherit;
+      color: #fff;
+      background: var(--rose);
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 var(--rose-deep);
+    }
+    .together button:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--rose-deep); }
+
+    #confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .music {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 3;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(232, 80, 127, 0.2);
+    }
+    .music.playing { animation: spin 4s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 380px) {
+      main { padding: 32px 16px 24px; }
+      .countdown { gap: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hearts, .beat { animation: none; }
+      .hearts { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" aria-hidden="true"></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <audio id="song" src="zar-zor.mp3" loop preload="auto"></audio>
+  <button type="button" class="music" id="music" aria-label="Play music">🔇</button>
+
+  <main>
+    <h1 class="names"><span id="names"></span></h1>
+
+    <section class="counting">
+      <p class="subtitle">until we're together again <span class="beat">💗</span></p>
+
+      <div class="countdown" role="timer" aria-live="off">
+        <div class="unit"><div class="num" id="d">0</div><div class="label">days</div></div>
+        <div class="unit"><div class="num" id="h">00</div><div class="label">hours</div></div>
+        <div class="unit"><div class="num" id="m">00</div><div class="label">minutes</div></div>
+        <div class="unit"><div class="num" id="s">00</div><div class="label">seconds</div></div>
+      </div>
+
+      <p class="date-line" id="date-line"></p>
+
+      <div class="progress">
+        <div class="progress-head">
+          <span>goodbye 👋</span>
+          <span>hello 🤗</span>
+        </div>
+        <div class="track">
+          <div class="fill" id="fill"></div>
+          <span class="runner" id="runner">✈️</span>
+          <span class="goal">🏡</span>
+        </div>
+        <p class="progress-foot" id="progress-foot"></p>
+      </div>
+
+      <p class="note" id="note"></p>
+    </section>
+
+    <section class="together">
+      <h2>Together at last!</h2>
+      <p>No more counting. Go hug each other 💞</p>
+      <button type="button" id="again">more confetti 🎉</button>
+    </section>
+  </main>
+
+  <script>
+    // ── Edit these ──────────────────────────────────────────────
+    // Dates use ISO format with a UTC offset, e.g. +01:00 for Stockholm in winter.
+    const CONFIG = {
+      names:   "Enes & Bilge",
+      meet:    "2026-11-07T16:45:00+03:00", // 7 Nov, 16:45 Istanbul time
+      goodbye: "2026-09-01T10:00:00+02:00", // the day you said goodbye (for the progress bar)
+      note:    "Every second that ticks away is one second closer to you.",
+    };
+    // ────────────────────────────────────────────────────────────
+
+    const meet = new Date(CONFIG.meet);
+    const goodbye = new Date(CONFIG.goodbye);
+    const $ = (id) => document.getElementById(id);
+    const pad = (n) => String(n).padStart(2, "0");
+
+    $("names").textContent = CONFIG.names;
+    $("note").textContent = CONFIG.note;
+    $("date-line").textContent = meet.toLocaleString(undefined, {
+      weekday: "long", day: "numeric", month: "long", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+
+    let celebrated = false;
+
+    function tick() {
+      const now = Date.now();
+      const left = meet - now;
+
+      if (left <= 0) {
+        document.body.classList.add("reunited");
+        if (!celebrated) { celebrated = true; celebrate(); }
+        return;
+      }
+
+      const sec = Math.floor(left / 1000);
+      $("d").textContent = Math.floor(sec / 86400);
+      $("h").textContent = pad(Math.floor(sec / 3600) % 24);
+      $("m").textContent = pad(Math.floor(sec / 60) % 60);
+      $("s").textContent = pad(sec % 60);
+
+      const total = meet - goodbye;
+      const pct = total > 0 ? Math.min(100, Math.max(0, ((now - goodbye) / total) * 100)) : 0;
+      $("fill").style.width = pct + "%";
+      $("runner").style.left = pct + "%";
+      $("progress-foot").textContent = `${pct.toFixed(1)}% of the way there`;
+    }
+
+    tick();
+    setInterval(tick, 1000);
+
+    // Floating background hearts
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduceMotion) {
+      const glyphs = ["💗", "💕", "💖", "🤍", "💓", "🌸"];
+      const box = document.querySelector(".hearts");
+      for (let i = 0; i < 18; i++) {
+        const h = document.createElement("span");
+        h.textContent = glyphs[i % glyphs.length];
+        h.style.left = Math.random() * 100 + "vw";
+        h.style.fontSize = 14 + Math.random() * 22 + "px";
+        h.style.animationDuration = 10 + Math.random() * 12 + "s";
+        h.style.animationDelay = -Math.random() * 20 + "s";
+        box.appendChild(h);
+      }
+    }
+
+    // Confetti for the big moment
+    const canvas = $("confetti");
+    const ctx = canvas.getContext("2d");
+    let pieces = [];
+    let animating = false;
+
+    function resize() {
+      canvas.width = innerWidth * devicePixelRatio;
+      canvas.height = innerHeight * devicePixelRatio;
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    addEventListener("resize", resize);
+    resize();
+
+    function celebrate() {
+      if (reduceMotion) return;
+      const colors = ["#ff7aa2", "#e8507f", "#ffc2a8", "#ffd166", "#b5e3d8", "#c9b6ff"];
+      for (let i = 0; i < 220; i++) {
+        pieces.push({
+          x: innerWidth / 2 + (Math.random() - 0.5) * 120,
+          y: innerHeight / 2.5,
+          vx: (Math.random() - 0.5) * 14,
+          vy: -Math.random() * 14 - 4,
+          size: 6 + Math.random() * 8,
+          rot: Math.random() * Math.PI,
+          vr: (Math.random() - 0.5) * 0.3,
+          color: colors[i % colors.length],
+          heart: Math.random() < 0.3,
+          life: 0,
+        });
+      }
+      if (!animating) { animating = true; requestAnimationFrame(draw); }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      pieces = pieces.filter((p) => p.y < innerHeight + 40 && p.life < 400);
+      for (const p of pieces) {
+        p.vy += 0.35;
+        p.vx *= 0.99;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.vr;
+        p.life++;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        if (p.heart) {
+          ctx.font = `${p.size * 2}px sans-serif`;
+          ctx.fillText("💗", -p.size, p.size);
+        } else {
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        }
+        ctx.restore();
+      }
+      if (pieces.length) requestAnimationFrame(draw);
+      else animating = false;
+    }
+
+    $("again").addEventListener("click", celebrate);
+
+    // Background music: browsers block autoplay with sound, so fall back to the first interaction
+    const song = $("song");
+    const musicBtn = $("music");
+    song.volume = 0.6;
+
+    function syncMusicBtn() {
+      const on = !song.paused;
+      musicBtn.textContent = on ? "🎵" : "🔇";
+      musicBtn.classList.toggle("playing", on);
+      musicBtn.setAttribute("aria-label", on ? "Pause music" : "Play music");
+    }
+    song.addEventListener("play", syncMusicBtn);
+    song.addEventListener("pause", syncMusicBtn);
+
+    function startOnInteraction(e) {
+      if (e.target === musicBtn) return;
+      song.play().catch(() => {});
+    }
+    const unlockEvents = ["pointerdown", "keydown", "touchstart"];
+    unlockEvents.forEach((ev) => addEventListener(ev, startOnInteraction, { once: true }));
+    song.addEventListener("play", () => {
+      unlockEvents.forEach((ev) => removeEventListener(ev, startOnInteraction));
+    }, { once: true });
+
+    song.play().catch(() => {});
+
+    musicBtn.addEventListener("click", () => {
+      if (song.paused) song.play().catch(() => {});
+      else song.pause();
+    });
+  </script>
+</body>
+</html>
