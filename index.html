@@ -198,7 +198,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Music-reactive: --pulse jumps to 1 on each beat and decays, --level follows the bass */
-    :root { --pulse: 0; --level: 0; }
+    :root { --pulse: 0; --level: 0; --sway: 1; }
     body.music-on .beat { animation: none; transform: scale(calc(1 + var(--pulse) * 0.6)); }
     body.music-on .names { transform: scale(calc(1 + var(--pulse) * 0.04)); }
     body.music-on .unit { transform: scale(calc(1 + var(--pulse) * 0.04)); }
@@ -208,7 +208,11 @@
     }
     body.music-on .hearts span span {
       animation: none;
-      transform: scale(calc(0.8 + var(--level) * 0.3 + var(--pulse) * var(--amp)));
+      /* Small dance on each beat: hop up, lean left/right (alternating), swell a little */
+      transform:
+        translate(calc(var(--pulse) * var(--sway) * var(--side) * 6px), calc(var(--pulse) * var(--amp) * -12px))
+        rotate(calc(var(--pulse) * var(--sway) * var(--side) * 14deg))
+        scale(calc(0.9 + var(--level) * 0.15 + var(--pulse) * var(--amp) * 0.5));
     }
 
     .pops {
@@ -329,7 +333,8 @@
         inner.textContent = glyphs[i % glyphs.length];
         inner.style.animationDuration = 1.5 + Math.random() * 2.5 + "s";
         inner.style.animationDelay = -Math.random() * 4 + "s";
-        inner.style.setProperty("--amp", (0.3 + Math.random() * 0.6).toFixed(2));
+        inner.style.setProperty("--amp", (0.5 + Math.random() * 0.5).toFixed(2));
+        inner.style.setProperty("--side", Math.random() < 0.5 ? -1 : 1);
         h.appendChild(inner);
         h.style.left = Math.random() * 100 + "vw";
         h.style.fontSize = 14 + Math.random() * 24 + "px";
@@ -418,7 +423,7 @@
     // Beat-reactive visuals. The AudioContext has to be created from a tap,
     // so this runs from the first tap or the music button.
     let audioCtx, analyser, freq;
-    let bassAvg = 0, pulse = 0, level = 0, lastBeat = 0;
+    let bassAvg = 0, pulse = 0, level = 0, lastBeat = 0, sway = 1;
     const root = document.documentElement;
     const popBox = document.querySelector(".pops");
     const popGlyphs = ["💗", "💕", "💖", "✨", "🌸", "💞", "🌹", "🌷", "🌺", "💐", "🌼", "💘", "💝", "❤️", "🩷", "🥰", "😘", "💋", "🦋"];
@@ -458,6 +463,8 @@
       if (bass > bassAvg * 1.6 && t - lastBeat > 250) {
         lastBeat = t;
         pulse = 1;
+        sway = -sway;
+        root.style.setProperty("--sway", sway);
         popEmojis();
       }
       bassAvg = bassAvg * 0.9 + bass * 0.1;
